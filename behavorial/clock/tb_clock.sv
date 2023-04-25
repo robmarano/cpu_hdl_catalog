@@ -23,7 +23,8 @@ module tb_clock;
    initial begin
         $dumpfile("clock.vcd");
         $dumpvars(0, uut);
-        $monitor("enable = %b clk = %b", enable, clk);
+        //$monitor("enable = %b clk = %b", enable, clk);
+        $monitor("time=%0t \t enable=%b clk=%b",$realtime, enable, clk);
     end
 
     initial begin

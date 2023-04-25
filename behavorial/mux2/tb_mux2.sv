@@ -29,7 +29,8 @@ module tb_mux2;
    initial begin
         $dumpfile("mux2.vcd");
         $dumpvars(0, uut0, uut1);
-        $monitor("s = %0b d0 = (0x%0h)(%0d) d1 = (0x%0h)(%0d) y = (0x%0h)(%0d)", s, d0, d0, d1, d1, y, y);
+        // $monitor("s = %0b d0 = (0x%0h)(%0d) d1 = (0x%0h)(%0d) y = (0x%0h)(%0d)", s, d0, d0, d1, d1, y, y);
+        $monitor("time=%0t \t enable=%0b s=%0b y=%h d0=%h d1=%h",$realtime, enable, s, y, d0, d1);
     end
 
     initial begin
@@ -40,7 +41,7 @@ module tb_mux2;
         #10 s <= 1'b0;
         #20 s <= 1'b1;
         #100 enable <= 0;
-        $finish;         
+        $finish;
     end
 
     mux2 uut0(

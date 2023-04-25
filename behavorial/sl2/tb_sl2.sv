@@ -23,7 +23,8 @@ module tb_sl2;
    initial begin
         $dumpfile("sl2.vcd");
         $dumpvars(0, uut);
-        $monitor("a = %0b (0x%0h)(%0d) y = %0b (0x%0h)(%0d) ", a, a, a, y, y, y);
+        //$monitor("a = %0b (0x%0h)(%0d) y = %0b (0x%0h)(%0d) ", a, a, a, y, y, y);
+        $monitor("time=%0t \t a=%b y=%b",$realtime, a, y);
     end
 
     initial begin

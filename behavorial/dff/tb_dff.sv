@@ -28,7 +28,8 @@ module tb_dff;
    initial begin
         $dumpfile("dff.vcd");
         $dumpvars(0, uut0, uut1);
-        $monitor("d = %b (0x%0h)(%0d) q = %b (0x%0h)(%0d) ", d,d,d,q,q,q);
+        //$monitor("d = %b (0x%0h)(%0d) q = %b (0x%0h)(%0d) ", d,d,d,q,q,q);
+        $monitor("time=%0t \t d=%h q=%h",$realtime, d, q);
     end
 
     initial begin

@@ -25,7 +25,8 @@ module tb_sl2;
    initial begin
         $dumpfile("signext.vcd");
         $dumpvars(0, uut);
-        $monitor("a = %b (0x%0h)(%0d) y = %b (0x%0h)(%0d) ", a, a, a, y, y, y);
+        //$monitor("a = %b (0x%0h)(%0d) y = %b (0x%0h)(%0d) ", a, a, a, y, y, y);
+        $monitor("time=%0t \t a=%b y=%b",$realtime, a, y);
     end
 
     initial begin
