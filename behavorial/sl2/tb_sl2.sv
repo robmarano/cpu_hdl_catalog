@@ -4,7 +4,7 @@
 // Engineer: Prof Rob Marano
 // 
 //     Create Date: 2023-02-07
-//     Module Name: tb_sla
+//     Module Name: tb_sl2
 //     Description: Test bench for shift left by 2 (multiply by 4)
 //
 // Revision: 1.0

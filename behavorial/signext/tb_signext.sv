@@ -4,34 +4,36 @@
 // Engineer: Prof Rob Marano
 // 
 //     Create Date: 2023-02-07
-//     Module Name: tb_sla
-//     Description: Test bench for shift left by 2 (multiply by 4)
+//     Module Name: tb_signext
+//     Description: Test bench for sign extender
 //
 // Revision: 1.0
 //
 //////////////////////////////////////////////////////////////////////////////////
-`ifndef TB_SL2
-`define TB_SL2
+`ifndef TB_SIGNEXT
+`define TB_SIGNEXT
 
 `timescale 1ns/100ps
-`include "sl2.sv"
+`include "signext.sv"
 
 module tb_sl2;
-    parameter n = 32;
-    logic [(n-1):0] a, y;
+    parameter n = 32; // #bits for an operand
+    parameter i = n/2; // #bits for an immediate
+    logic [(i-1):0] a;
+    logic [(n-1):0] y;
 
    initial begin
-        $dumpfile("sl2.vcd");
+        $dumpfile("signext.vcd");
         $dumpvars(0, uut);
-        $monitor("a = %0b (0x%0h)(%0d) y = %0b (0x%0h)(%0d) ", a, a, a, y, y, y);
+        $monitor("a = %b (0x%0h)(%0d) y = %b (0x%0h)(%0d) ", a, a, a, y, y, y);
     end
 
     initial begin
-        a <= #n'h0000000F;
+        a <= #i'h8000;
     end
 
-    sl2 uut(
+    signext uut(
         .A(a), .Y(y)
     );
 endmodule
-`endif // TB_SL2
+`endif // TB_SIGNEXT

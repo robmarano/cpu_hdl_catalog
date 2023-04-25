@@ -4,29 +4,29 @@
 // Engineer: Prof Rob Marano
 // 
 //     Create Date: 2023-02-07
-//     Module Name: sl2
-//     Description: shift left by 2 (multiply by 4)
+//     Module Name: signext
+//     Description: 16 to 32 bit sign extender
 //
 // Revision: 1.0
 //
 //////////////////////////////////////////////////////////////////////////////////
-`ifndef SL2
-`define SL2
+`ifndef SIGNEXT
+`define SIGNEXT
 
 `timescale 1ns/100ps
 
-module sl2
-    #(parameter n = 32)(
+module signext
+    #(parameter n = 32, i = 16)(
     //
     // ---------------- PORT DEFINITIONS ----------------
     //
-    input  logic [(n-1):0] A,
+    input  logic [(i-1):0] A,
     output logic [(n-1):0] Y
 );
     //
     // ---------------- MODULE DESIGN IMPLEMENTATION ----------------
     //
-    assign Y = {A[(n-3):0], 2'b00};
+    assign Y = { {n{A[(i-1)]}}, A}; // sign extend (i-1)th bit i bits to the left.
 endmodule
 
-`endif // SL2
+`endif // SIGNEXT
