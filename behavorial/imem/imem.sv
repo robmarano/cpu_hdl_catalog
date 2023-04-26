@@ -16,6 +16,7 @@
 `timescale 1ns/100ps
 
 module imem
+// n=bit length of register; r=bit length of addr to limit memory and not crash your verilog emulator
     #(parameter n = 32, parameter r = 6)(
     //
     // ---------------- PORT DEFINITIONS ----------------
