@@ -1,3 +1,10 @@
+# MAC
+.DS_Store
+
+# Verilog
+*.vvp
+*.vcd
+
 # Prerequisites
 *.d
 
