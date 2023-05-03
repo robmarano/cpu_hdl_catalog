@@ -34,10 +34,10 @@ module datapath
     input  logic        regwrite, jump,
     input  logic [2:0]  alucontrol,
     output logic        zero,
-    output logic [31:0] pc,
-    input  logic [31:0] instr,
-    output logic [31:0] aluout, writedata,
-    input  logic [31:0] readdata
+    output logic [(n-1):0] pc,
+    input  logic [(n-1):0] instr,
+    output logic [(n-1):0] aluout, writedata,
+    input  logic [(n-1):0] readdata
 );
     //
     // ---------------- MODULE DESIGN IMPLEMENTATION ----------------
@@ -69,4 +69,3 @@ module datapath
 endmodule
 
 `endif // DATAPATH
-

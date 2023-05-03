@@ -33,7 +33,6 @@ module cpu
     //
     // ---------------- MODULE DESIGN IMPLEMENTATION ----------------
     //
-    //logic [(n-1):0] pc, instr, readdata;
 
     // cpu internal components
     logic       memtoreg, alusrc, regdst, regwrite, jump, pcsrc, zero;
