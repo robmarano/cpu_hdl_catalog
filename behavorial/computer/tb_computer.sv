@@ -56,6 +56,7 @@ module tb_computer;
   // initialize test
   initial begin
     #0 clk_enable <= 0; #50 reset <= 1; # 50; reset <= 0; #50 clk_enable <= 1;
+    #100 $finish;
   end
 
   // monitor what happens at posedge of clock transition
@@ -114,48 +115,34 @@ module tb_computer;
     $display("\t-regfile -- rd2 = %d",dut.mips.dp.rf.rd2);
     $display("\t+RAM[%4d] = %4d",dut.dmem.addr,dut.dmem.readdata);
     $display("writedata\tdataadr\tmemwrite");
+  end
+
+  always @(negedge clk, posedge clk) begin
     // check results
     // TODO: You need to update the checks below
-    if (dut.dmem.RAM[84] === 32'h9504)
+    // if (dut.dmem.RAM[84] === 32'h9504)
+    //   begin
+    //     $display("Successfully wrote 0x%4h at RAM[%3d]",84,32'h9504);
+    //     firstTest = 1'b1;
+    //   end
+
+    if (dut.dmem.RAM[84] === 32'h96)
       begin
-        $display("Successfully wrote 0x%4h at RAM[%3d]",84,32'h9504);
+        $display("Successfully wrote 0x%4h at RAM[%3d]",84,32'h0096);
         firstTest = 1'b1;
-      end
-    if (dut.dmem.RAM[88] === 0)
-      begin
-        $display("Successfully wrote 0x%4h at RAM[%3d]",88,0);
-        secondTest = 1'b1;
       end
     if(memwrite) begin
-      if(dataadr === 84 & writedata === 32'h9504)
+      if(dataadr === 84 & writedata === 32'h96)
       begin
         $display("Successfully wrote 0x%4h at RAM[%3d]",writedata,dataadr);
         firstTest = 1'b1;
       end
-      if(dataadr === 88 & writedata === 0)
-      begin
-        $display("Successfully wrote 0x%4h at RAM[%3d]",writedata,dataadr);
-        secondTest = 1'b1;
-      //if(dataadr === 60 & writedata === 28) begin
-          // $display("Simulation succeeded");
-          // $finish;
-        // end
-      end
-      // else if (dataadr !== 80) begin
-      //   $display("Simulation failed");
-      //   $finish;
-      // end
     end
-    if (firstTest === 1'b1 & secondTest === 1'b1)
+    if (firstTest === 1'b1)
     begin
         $display("Program successfully completed");
         $finish;
     end
-    // else
-    // begin
-    //     $display("Program UNsuccessfully completed");
-    //     $finish;
-    // end
   end
 
 endmodule
