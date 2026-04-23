@@ -1,85 +1,126 @@
-# MIPS Single-Cycle Architecture
+# MIPS CPU Architecture Documentation
 
-## Solution Architecture
+This project catalogs three fundamental ways to implement the MIPS32 RISC instruction set.
+
+## 1. Unified Solution Architecture
+
+All three implementations share the same external memory and I/O interface.
 
 ```mermaid
 graph TD
-    subgraph Computer System
+    subgraph System Bus
         CLK[Clock Generator]
-        CPU[MIPS CPU]
-        IMEM[(Instruction Memory)]
-        DMEM[(Data Memory)]
+        IO[Halt Output addr 252]
     end
 
-    CLK -->|clk| CPU
-    CLK -->|clk| DMEM
-    CPU -->|pc| IMEM
-    IMEM -->|instr| CPU
-    CPU -->|dataadr| DMEM
-    CPU -->|writedata| DMEM
-    CPU -->|memwrite| DMEM
-    DMEM -->|readdata| CPU
+    subgraph Memory
+        MEM[(Unified Instruction/Data)]
+    end
+
+    subgraph CPU[MIPS CPU Implementation]
+        SINGLE[Single-Cycle]
+        MULTI[Multi-Cycle]
+        PIPE[Pipelined]
+    end
+
+    CLK --> CPU
+    CPU <--> MEM
+    CPU --> IO
 ```
 
-## CPU Internal Architecture
+---
+
+## 2. Multi-Cycle State Machine (FSM)
+
+The multi-cycle implementation shares a single ALU and memory, transitioning through states to complete an instruction.
 
 ```mermaid
-graph TD
-    subgraph CPU
-        CTRL[Controller]
-        DP[Datapath]
+stateDiagram-v2
+    [*] --> Fetch
+    Fetch --> Decode
+    Decode --> MemAdr: lw/sw
+    Decode --> ExecuteR: R-type
+    Decode --> Branch: beq
+    Decode --> ADDIExec: addi
+    Decode --> Jump: j
+
+    MemAdr --> MemRead: lw
+    MemAdr --> MemWrite: sw
+    MemRead --> MemWriteback
+    MemWriteback --> Fetch
+    MemWrite --> Fetch
+
+    ExecuteR --> ALUWriteback
+    ALUWriteback --> Fetch
+
+    Branch --> Fetch
+    ADDIExec --> ADDIWriteback
+    ADDIWriteback --> Fetch
+    Jump --> Fetch
+```
+
+---
+
+## 3. Pipelined Architecture (5 Stages)
+
+The pipelined implementation overlaps instruction execution using registers between stages.
+
+```mermaid
+graph LR
+    subgraph IF [Fetch]
+        PC[Program Counter]
     end
-    
-    subgraph Controller
-        MD[Main Decoder]
-        AD[ALU Decoder]
-    end
-    
-    subgraph Datapath
-        PC[PC Register]
+
+    subgraph ID [Decode]
         RF[Register File]
-        ALU[Arithmetic Logic Unit]
-        EXT[Sign Extend]
+        HU[Hazard Unit]
     end
 
-    CTRL -->|memtoreg, memwrite, alusrc, regdst, regwrite, jump, pcsrc| DP
-    CTRL -->|alucontrol 4-bit| ALU
-    DP -->|zero| CTRL
+    subgraph EX [Execute]
+        ALU[ALU]
+    end
+
+    subgraph MEM [Memory]
+        DM[Data Memory]
+    end
+
+    subgraph WB [Writeback]
+        REG[Reg Write]
+    end
+
+    PC -->|instr| RF
+    RF -->|operands| ALU
+    ALU -->|result| DM
+    DM -->|data| REG
+    REG -.->|forward/write| RF
+    HU -.->|stall/flush| PC
+    HU -.->|forward| ALU
 ```
 
-## Instruction Execution Sequence
+---
 
-```mermaid
-sequenceDiagram
-    participant PC as Program Counter
-    participant IMEM as Instruction Mem
-    participant CTRL as Controller
-    participant RF as Register File
-    participant ALU as ALU
-    participant DMEM as Data Mem
+## 4. Hardware Standard: 4-bit ALU Control
 
-    PC->>IMEM: Fetch Instruction (PC)
-    IMEM-->>CTRL: Instruction [31:26], [5:0]
-    IMEM-->>RF: Read Registers [25:21], [20:16]
-    IMEM-->>ALU: Sign-Extended Imm [15:0] (if alusrc)
-    
-    CTRL->>RF: Control Signals (regdst, regwrite)
-    CTRL->>ALU: ALU Control (4-bit)
-    
-    RF-->>ALU: Operand A & Operand B
-    ALU-->>DMEM: ALU Result (Address)
-    RF-->>DMEM: Write Data
-    
-    CTRL->>DMEM: memwrite
-    DMEM-->>RF: Read Data (if memtoreg)
-    ALU-->>RF: ALU Result (if not memtoreg)
-```
+All architectures use this unified 4-bit control mapping:
 
-## Unimplemented Designs (Future Work)
-The current single-cycle MIPS implementation is functional but currently lacks the following common CPU architecture features:
-- **Pipelining**: Breaking down the cycle into IF, ID, EX, MEM, WB stages using pipeline registers.
-- **Hazard Detection & Forwarding Unit**: Required to resolve data and control hazards if pipelining is introduced.
-- **Exception Handling (Coprocessor 0)**: Support for handling internal exceptions (overflows, undefined instructions) and external interrupts.
-- **Floating-Point Unit (Coprocessor 1)**: For hardware acceleration of IEEE 754 operations.
-- **Cache Memory**: Replacing direct combinatorial memory access with hierarchical L1/L2 caches.
-- **Branch Prediction**: Static or dynamic branch predictors to minimize control hazard penalties.
+| ALUControl | Operation | MIPS Funct/Op |
+| :--- | :--- | :--- |
+| `0000` | AND | `0x24` |
+| `0001` | OR | `0x25` |
+| `0010` | ADD | `0x20` / `0x08` (addi) |
+| `0011` | NOR | `0x27` |
+| `0100` | MFLO | `0x12` |
+| `0101` | MFHI | `0x10` |
+| `0110` | SUB | `0x22` |
+| `0111` | SLT | `0x2a` |
+| `1000` | MULT | `0x18` |
+| `1001` | DIV | `0x1a` |
+
+---
+
+## 5. Unimplemented Designs (Future Work)
+
+- **Precise Exception Handling**: The pipelined model needs to capture the correct PC in the `EPC` register during a flush to allow for instruction re-execution.
+- **Dynamic Branch Prediction**: Replace the current stall-based or static prediction with a Branch Target Buffer (BTB).
+- **L1 Cache**: Separate Instruction and Data caches to resolve memory contention in the pipelined model.
+- **Floating Point Unit (FPU)**: Integration of MIPS Coprocessor 1.
