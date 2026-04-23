@@ -2,8 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v0.1.0] - 2026-04-23
+## [1.0.0] - 2026-04-23
 ### Added
+- **Unified MIPS Template**: Released as the official stable template for ECE 251.
 - **Multi-Cycle Computer**: Full implementation of a 12-state FSM-based MIPS32 processor.
 - **Pipelined Computer**: Advanced 5-stage pipeline with hazard unit and exceptions.
 - **Centralized Programs Directory**: Shared `.asm` and `.exe` files for all architectures.
