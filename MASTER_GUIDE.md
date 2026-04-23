@@ -61,7 +61,22 @@ The Pipelined processor overlaps instructions to maximize throughput.
 
 ---
 
-## Phase 4: Software Ecosystem & Testing
+## Phase 4: Memory Hierarchy (Caches)
+**Goal:** Optimize performance by minimizing the "Memory Wall" penalty.
+
+Real-world memory is slow. To simulate this, your `dmem.sv` should include a multi-cycle latency (e.g., 10 cycles).
+
+1.  **Cache Controller**: Implement a module that sits between the CPU and Main Memory. 
+    *   **Direct-Mapped**: Simplest to implement using a single tag and valid bit.
+    *   **Fully-Associative**: Highest hit rate but most complex hardware logic.
+2.  **Stall Logic**: When a cache miss occurs, the controller must assert a `mem_stall` signal to freeze the entire CPU pipeline until the memory data is ready.
+3.  **Benchmarking**: Compare your performance with and without the cache.
+    *   `make run CACHE_EN=0` (Baseline)
+    *   `make run CACHE_EN=1` (Optimized)
+
+---
+
+## Phase 5: Software Ecosystem & Testing
 **Goal:** Translate code and verify the hardware.
 
 1.  **Assembler (`tools/assembler.py`):** Translate `.asm` MIPS files into `.exe` hex files.

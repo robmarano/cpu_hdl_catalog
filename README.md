@@ -17,10 +17,16 @@ An advanced 5-stage pipelined processor (IF, ID, EX, MEM, WB) featuring:
 - **Hazard Detection & Forwarding**: Resolves data and control hazards to maintain throughput.
 - **Exceptions & Interrupts**: Support for asynchronous hardware interrupts and internal exceptions.
 
-### 4. [Programs](./programs/)
-A centralized folder for MIPS assembly (`.asm`) source files and their compiled machine code equivalents (`.exe` / `.dat`). Since the ISA is identical across all three computers, programs can be shared.
+### 4. [Pipelined Cached Computer](./pipelined_cached_computer/)
+Extends the pipelined model with **Hierarchical Memory**:
+- **Cache Controller**: Supports Direct-Mapped, Set-Associative, and Fully-Associative configurations.
+- **Memory Wall Analysis**: Demonstrates the impact of 10-cycle main memory latency vs. 1-cycle cache hits.
+- **Performance Telemetry**: Integrated cycle counters, hit/miss tracking, and CPI calculation.
 
-### 5. [Tools](./tools/)
+### 5. [Programs](./programs/)
+A centralized folder for MIPS assembly (`.asm`) source files and their compiled machine code equivalents (`.exe` / `.dat`). Since the ISA is identical across all architectures, programs can be shared.
+
+### 6. [Tools](./tools/)
 Centralized Python scripts for development:
 - `assembler.py`: Translates MIPS assembly into machine code hex format.
 - `patch.py`: Utility for patching or verifying machine code.
