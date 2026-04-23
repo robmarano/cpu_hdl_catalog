@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.2] - 2026-04-23
+### Added
+- **Pipelined Cached Computer**: Full integration of L1 Cache Controllers (Direct, Set, Fully Associative).
+- **Memory Latency Simulation**: `dmem.sv` now supports multi-cycle latency with a `dmem_ready` handshake.
+- **Performance Benchmarking**: Integrated telemetry into testbenches to track CPI, Hits, and Misses.
+- **Cache Architecture Diagrams**: Added Mermaid hierarchical diagrams to `ARCHITECTURE.md`.
+
 ## [1.0.1] - 2026-04-23
 ### Added
 - **Detailed FSM Documentation**: Enhanced `ARCHITECTURE.md` with cycle-by-cycle FSM state mechanisms for the multi-cycle implementation.
