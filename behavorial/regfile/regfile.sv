@@ -40,7 +40,7 @@ module regfile
     // on falling edge of clk
 
     always @(posedge clk)
-        if (we3) rf[wa3] <= wd3;	
+        if (we3 && wa3 != 0) rf[wa3] <= wd3;	
 
     assign rd1 = (ra1 != 0) ? rf[ra1] : 0;
     assign rd2 = (ra2 != 0) ? rf[ra2] : 0;

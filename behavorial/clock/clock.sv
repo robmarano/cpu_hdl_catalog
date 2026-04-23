@@ -36,22 +36,12 @@ module clock
       start_clock <= 0;
     end
 
-    always @(posedge ENABLE or negedge ENABLE) begin
-        if (ENABLE) begin
-            start_clock = 1;
-        end
-        else begin
-            start_clock = 0;
-        end
-        // #ticks CLOCK = ~CLOCK;
-    end
-    always @(start_clock) begin
-        CLOCK = 0;
-        while (start_clock) begin
-            #(clock_off) CLOCK = 1;
-            #(clock_on) CLOCK = 0;
-        end
-        CLOCK = 0;
+    always begin
+        #(ticks/2);
+        if (ENABLE)
+            CLOCK = ~CLOCK;
+        else
+            CLOCK = 0;
     end
 endmodule
 
