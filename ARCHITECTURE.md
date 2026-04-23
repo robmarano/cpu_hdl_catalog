@@ -117,7 +117,35 @@ graph LR
 
 ---
 
-## 4. Hardware Standard: 4-bit ALU Control
+## 4. Pipelined Cache Architecture (Memory Hierarchy)
+
+The Pipelined Cached implementation introduces a Cache Controller between the CPU and Main Memory to mitigate the performance penalty of slow DRAM.
+
+```mermaid
+graph TD
+    subgraph CPU [MIPS Pipelined CPU]
+        DP[Datapath]
+    end
+
+    subgraph Memory Hierarchy
+        L1[L1 Cache Controller]
+        DRAM[(Main Memory / dmem)]
+    end
+
+    DP <-->|addr, rd, wr, data| L1
+    L1 <-->|miss: fetch block| DRAM
+    L1 -->|mem_stall| DP
+```
+
+### Cache Controller Mechanisms
+1.  **Direct-Mapped**: Simplest mapping where each memory address maps to exactly one cache line. Uses a Tag and Valid bit.
+2.  **Set-Associative**: Balance between complexity and hit rate. Multiple "ways" per set.
+3.  **Fully-Associative**: Any memory block can go into any cache line. Uses CAM (Content Addressable Memory) logic for parallel tag matching.
+4.  **Ready/Stall Handshake**: The CPU asserts `memread/memwrite`. If a miss occurs, the Cache asserts `mem_stall` and interacts with `dmem` until `dmem_ready` is signaled.
+
+---
+
+## 5. Hardware Standard: 4-bit ALU Control
 
 All architectures use this unified 4-bit control mapping:
 

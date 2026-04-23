@@ -1,40 +1,26 @@
-# Pull Request Summary: Unified MIPS CPU Project Template
+# Pull Request Summary: Pipelined Cache Integration & Benchmarking
 
 ## Overview
-This PR represents a major evolution of the repository into a production-ready pedagogical template for ECE 251. It integrates three distinct MIPS32 architectures, centralizes common resources, and introduces a robust multi-cycle implementation.
+This PR finalizes the integration of the **Pipelined Cached Computer** into the unified ECE 251 template. It introduces hierarchical memory simulation, allowing students to explore the "Memory Wall" and the performance impact of various caching strategies.
 
 ## Key Changes
 
-### 1. Repository Restructuring
-- **Flattened and Modularized**: Reorganized the repository into three self-contained folders: `single_cycle_computer/`, `multi_cycle_computer/`, and `pipelined_computer/`.
-- **Centralized Programs**: Created a top-level `programs/` directory to host shared `.asm` and compiled `.exe` files, ensuring all three computers can run the same software tests.
-- **Centralized Tooling**: Moved `assembler.py` and `patch.py` into a top-level `tools/` directory.
+### 1. Architectural Upgrade
+- **L1 Cache Controllers**: Added `cache_direct_mapped.sv`, `cache_set_associative.sv`, and `cache_fully_associative.sv`.
+- **Memory Handshaking**: Updated the system bus to handle asynchronous `dmem_ready` signals and `mem_stall` back-pressure.
+- **Hierarchy Diagram**: Created a Mermaid visualization in `ARCHITECTURE.md` showing the DP <-> L1 <-> DRAM relationship.
 
-### 2. Multi-Cycle Implementation (New)
-- Designed and built a **12-state FSM-based multi-cycle MIPS32 processor** from scratch.
-- **Unified Memory**: Implemented a shared Instruction/Data memory module (`mem.sv`).
-- **Intermediate State**: Added non-architectural registers (`IR`, `MDR`, `A`, `B`, `ALUOut`) to hold state between cycles.
-- **Verified**: Confirmed functionality via testbench simulation using the centralized multiplication program.
+### 2. Performance Telemetry
+- **Hardware Counters**: Modified `tb_computer.sv` to count clock cycles, retired instructions, and cache hits/misses.
+- **Automated CPI Calculation**: The simulation now prints an "Effective CPI" summary upon program termination.
+- **loop_test.asm**: Added a benchmark program specifically designed to demonstrate temporal and spatial locality.
 
-### 3. Pipelined Implementation Integration
-- Imported the advanced **5-stage pipelined processor** from the Week 12 curriculum.
-- Includes full **Hazard Detection**, **Data Forwarding**, and **Exception Handling** support.
-- Standardized the ALU control and decoding logic to match the rest of the template.
+### 3. Documentation
+- **Phase 4 (Caches)**: Added a new phase to `MASTER_GUIDE.md` detailing how to optimize performance via memory hierarchy.
+- **Benchmarking CLI**: Documented the `+CACHE_EN` argument usage for comparative performance analysis.
 
-### 4. Standardization & Documentation
-- **4-bit ALU Control**: Synchronized all three architectures to a unified 4-bit ALU control bus, resolving instruction collisions for `mult`, `div`, `nor`, and `mfhi`.
-- **Include Guards**: Added missing `` `ifndef `` guards to all SystemVerilog modules to prevent double-compilation errors.
-- **Master Guide**: Added `MASTER_GUIDE.md` providing a structured, phase-based roadmap for students.
-- **Comprehensive README**: Updated the root `README.md` and repository description.
-
-## Architecture Diagrams
-- Updated `ARCHITECTURE.md` with:
-    - **Multi-Cycle FSM State Diagram** (Mermaid).
-    - **Pipeline Stage Visualization** (Mermaid).
-    - **Solution Architecture** for the unified system.
-
-## Unimplemented Designs (For Future Iterations)
-- **Precise Exception Recovery**: Fixing the EPC capture logic in the pipelined model (Stage EX vs ID).
-- **Branch Prediction**: Moving from static 1-cycle penalty to dynamic prediction.
-- **Memory-Mapped I/O Extensions**: Adding UART/VGA simulation targets.
-- **Cache Controller**: Implementing an L1 instruction/data cache in front of unified memory.
+## Unimplemented Designs (Reminder for later)
+- **Multi-core / SMP support**: Coordinating multiple CPU caches (Cache Coherency protocols).
+- **Virtual Memory / TLB**: Address translation before the L1 cache lookup.
+- **Write-Back vs Write-Through**: Currently, the models focus on read-hit logic; sophisticated write policies are future extensions.
+- **Advanced Branch Prediction**: Implementing BTB or Gshare to reduce pipeline bubbles.
