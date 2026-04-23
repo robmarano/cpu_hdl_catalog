@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.1] - 2026-04-23
+### Added
+- **Detailed FSM Documentation**: Enhanced `ARCHITECTURE.md` with cycle-by-cycle FSM state mechanisms for the multi-cycle implementation.
+- **Architectural Choice Roadmap**: Updated `MASTER_GUIDE.md` to offer clear Single-Cycle, Multi-Cycle, or Pipelined design paths.
+
 ## [1.0.0] - 2026-04-23
 ### Added
 - **Unified MIPS Template**: Released as the official stable template for ECE 251.

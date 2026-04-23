@@ -45,6 +45,6 @@ make all ASM=test_prog
 ```
 
 ## Release Information
-- **Current Version**: v1.0.0
+- **Current Version**: v1.0.1
 - **Architecture Standard**: MIPS32-compatible with 4-bit ALU Control.
 - **Register File**: Standard 32-register GPR file (Register 0 hardwired to 0).
