@@ -22,7 +22,7 @@ module alu
     //
     input  logic        clk,
     input  logic [(n-1):0] a, b,
-    input  logic [2:0]  alucontrol,
+    input  logic [3:0]  alucontrol,
     output logic [(n-1):0] result,
     output logic        zero
 );
@@ -44,41 +44,40 @@ module alu
 
     always @(a,b,alucontrol) begin
         case (alucontrol)
-            3'b000: result = a & b;             // and
-            3'b001: result = a | b;             // or
-            3'b010: result = a + b;             // add
-            3'b011: result = ~(a | b);           // nor
-            3'b100: result = HiLo[(n-1):0];     // MFLO
-            3'b101: result = HiLo[(2*n-1):n];   // MFHI
-            3'b110: result = sumSlt;            // sub
-            // 3'b111: result = sumSlt[(n-1)];     // slt
-            3'b111: begin                       // slt
-				if (a[31] != b[31])
-					if (a[31] > b[31])
-						result = 1;
-					else
-						result = 0;
-				else
-					if (a < b)
-						result = 1;
-					else
-						result = 0;
+            4'b0000: result = a & b;             // and
+            4'b0001: result = a | b;             // or
+            4'b0010: result = a + b;             // add
+            4'b0011: result = ~(a | b);          // nor
+            4'b0100: result = HiLo[(n-1):0];     // MFLO
+            4'b0101: result = HiLo[(2*n-1):n];   // MFHI
+            4'b0110: result = sumSlt;            // sub
+            4'b0111: begin                       // slt
+                                if (a[31] != b[31])
+                                        if (a[31] > b[31])
+                                                result = 1;
+                                        else
+                                                result = 0;
+                                else
+                                        if (a < b)
+                                                result = 1;
+                                        else
+                                                result = 0;
             end
+            default: result = {n{1'bx}};         // default for mult/div combinational output
         endcase
     end
 
     //Multiply and divide results are only stored at clock falling edge.
     always @(negedge clk) begin
         case (alucontrol)
-            3'b011: HiLo = a * b; // mult
-            3'b101: // div
+            4'b1000: HiLo = a * b; // mult
+            4'b1001: // div
             begin
                 HiLo[(n-1):0] = a / b;
                 HiLo[(2*n-1):n] = a % b;
             end
-        endcase				
+        endcase
     end
-
 endmodule
 
 `endif // ALU

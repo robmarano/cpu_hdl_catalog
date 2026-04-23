@@ -120,13 +120,13 @@ module tb_computer;
   always @(negedge clk, posedge clk) begin
     // check results
     // TODO: You need to update the checks below
-    // if (dut.dmem.RAM[84] === 32'h9504)
+    // if (dut.dmem.RAM[21] === 32'h9504)
     //   begin
     //     $display("Successfully wrote 0x%4h at RAM[%3d]",84,32'h9504);
     //     firstTest = 1'b1;
     //   end
 
-    if (dut.dmem.RAM[84] === 32'h96)
+    if (dut.dmem.RAM[21] === 32'h96)
       begin
         $display("Successfully wrote 0x%4h at RAM[%3d]",84,32'h0096);
         firstTest = 1'b1;

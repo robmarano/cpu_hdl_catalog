@@ -29,16 +29,21 @@ module controller
     output logic       pcsrc, alusrc,
     output logic       regdst, regwrite,
     output logic       jump,
-    output logic [2:0] alucontrol
+    output logic [3:0] alucontrol
 );
     //
     // ---------------- MODULE DESIGN IMPLEMENTATION ----------------
     //
     logic [1:0] aluop;
     logic       branch;
+    logic       regwrite_md;
     
     // CPU main decoder
-    maindec md(op, memtoreg, memwrite, branch, alusrc, regdst, regwrite, jump, aluop);
+    maindec md(op, memtoreg, memwrite, branch, alusrc, regdst, regwrite_md, jump, aluop);
+    
+    // Prevent regwrite for mult (0x18) and div (0x1a) instructions (they write to HiLo instead)
+    assign regwrite = regwrite_md & ~(op == 6'b000000 && (funct == 6'b011000 || funct == 6'b011010));
+
     // CPU's ALU decoder
     aludec  ad(funct, aluop, alucontrol);
 
