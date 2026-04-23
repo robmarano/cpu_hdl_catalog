@@ -1,6 +1,6 @@
-# ECE 251 Final Project: Building a Pipelined Von Neumann Computer
+# ECE 251 Final Project: Building MIPS CPU Architectures
 
-This guide provides step-by-step instructions on how to build a complete, 5-stage pipelined MIPS32 processor from scratch. By following these five phases, you will implement all components of a classical Von Neumann computer: **CPU, Memory, Datapath, Input, and Output.**
+This guide provides step-by-step instructions on how to build complete MIPS32 processors from scratch, covering Single-Cycle, Multi-Cycle, and Pipelined models. By following these phases, you will implement all components of a classical Von Neumann computer: **CPU, Memory, Datapath, Input, and Output.**
 
 ---
 
@@ -21,61 +21,51 @@ This guide provides step-by-step instructions on how to build a complete, 5-stag
 
 ---
 
-## Phase 2: The Datapath & Storage (State Elements)
-**Goal:** Implement registers and the structural stages of the pipeline.
+## Phase 2: Architectural Selection (Control Logic)
+**Goal:** Choose your control paradigm: Combinational, State-Machine, or Pipelined.
 
-1.  **Storage Elements:**
-    *   `dff.sv`: A standard 32-bit D Flip-Flop.
-    *   `flopenr.sv` / `flopenrc.sv`: Flip-flops with Enable and Synchronous Clear (crucial for stalling and flushing).
-    *   `regfile.sv`: A three-ported 32-word register file.
-2.  **Assembly of the Datapath (`datapath.sv`):**
-    *   **IF (Fetch):** Logic for `pcnext` (handling Jump, Branch, and Exception vectors).
-    *   **ID (Decode):** Local branch evaluation using `eqcmp` to minimize branch delay.
-    *   **EX (Execute):** ALU operations and the `EPC` (Exception Program Counter) register.
-    *   **MEM (Memory):** Data memory access stage.
-    *   **WB (Writeback):** Result selection and register file commits.
-3.  **Exception Logic:** In the Execute stage, capture `pcplus4D - 4` into the `EPC` register when `Exception_Flag` is high to ensure precise interrupt recovery.
+### A. Single-Cycle Mechanism (Combinational Control)
+The simplest model where one instruction finishes every clock cycle.
+1.  **Harvard Architecture**: Uses separate `imem.sv` and `dmem.sv` to allow fetching and data access in the same cycle.
+2.  **Combinational Decoder**: The `maindec.sv` is purely combinational, generating all control signals based solely on the current opcode.
+3.  **Long Critical Path**: Note that the clock speed is limited by the slowest instruction (usually `lw`).
+
+### B. Multi-Cycle Mechanism (Finite State Machine)
+The Multi-Cycle processor shares a single ALU and Memory to save hardware area.
+1.  **Unified Memory (`mem.sv`)**: Instead of separate I-Mem and D-Mem, create a single memory port. Use the `IorD` signal to multiplex between `PC` and `ALUOut`.
+2.  **The FSM (`fsm.sv`)**: Implement a state machine that cycles through Fetch, Decode, Execute, and Writeback.
+    *   **State 0 (Fetch)**: Enable `IRWrite` to capture the instruction from memory.
+    *   **State 1 (Decode)**: Pre-calculate branch targets.
+    *   **State 2-11 (Execution)**: Route data through the ALU based on the opcode.
+3.  **Datapath Registers**: Add non-architectural registers (`IR`, `MDR`, `A`, `B`, `ALUOut`) to hold data between clock cycles.
+
+### C. Pipelined Mechanism (Hazard & Concurrency)
+The Pipelined processor overlaps instructions to maximize throughput.
+1.  **Pipeline Registers**: Insert registers between IF, ID, EX, MEM, and WB stages to store the state of different instructions.
+2.  **Hazard Unit (`hazard.sv`)**: 
+    *   **Forwarding**: Route data from the MEM and WB stages back to the EX stage to resolve RAW hazards without stalling.
+    *   **Stalling**: If a `lw` instruction is followed by a dependent instruction, assert `stallF` and `stallD` while asserting `flushE` to insert a bubble.
+3.  **Flush Logic**: If an interrupt (`intr`) occurs, assert `flushD` and `flushE` to scrub instructions currently in the pipeline.
 
 ---
 
-## Phase 3: The Brain (CPU Control & Hazard Unit)
-**Goal:** Implement the logic that steers data and resolves timing conflicts.
-
-1.  **Main Decoder (`maindec.sv`):** Translate opcodes into 9-bit control vectors (RegWrite, RegDst, AluSrc, Branch, MemWrite, MemToReg, Jump, AluOp).
-2.  **Hazard Unit (`hazard.sv`):** This is the most complex part of a pipelined CPU.
-    *   **Forwarding:** Route data from the MEM and WB stages back to the EX stage to resolve RAW hazards without stalling.
-    *   **Stalling:** If a `lw` instruction is followed by a dependent instruction, assert `stallF` and `stallD` while asserting `flushE` to insert a bubble.
-    *   **Flushing:** If an interrupt (`intr`) occurs, assert `flushD` and `flushE` to scrub instructions currently in the pipeline.
-
----
-
-## Phase 4: The System Bus (Memory, Input & Output)
+## Phase 3: The System Bus (Memory, Input & Output)
 **Goal:** Connect your CPU to the outside world.
 
 1.  **Memory Subsystem:**
-    *   `imem.sv`: Instruction memory (Harvard Architecture). Use `parameter r = 8` for a 256-word depth.
-    *   `dmem.sv`: Data memory.
-2.  **The Computer Wrapper (`computer.sv`):** Connect the CPU's PC to I-Mem and its ALU result/WriteData to D-Mem.
+    *   `imem.sv` / `dmem.sv` (Harvard) or `mem.sv` (Von Neumann).
+2.  **The Computer Wrapper (`computer.sv`):** Connect the CPU to memory.
 3.  **I/O Mapping:**
     *   **Input:** The `intr` pin is your primary asynchronous input. When HIGH, it triggers the hardware exception vector.
     *   **Output:** Monitor memory writes to specific addresses to verify program success. Implement a universal halt condition that triggers `$finish` when the CPU writes to address `252` (`0xFC`).
-4.  **Hardware Exception Vector:** Hardcode the redirection address to `32'h8000_0180` in the datapath.
 
 ---
 
-## Phase 5: Software Ecosystem & Testing
+## Phase 4: Software Ecosystem & Testing
 **Goal:** Translate code and verify the hardware.
 
-1.  **Assembler (`assembler.py`):** Use the Python script to translate `.asm` MIPS files into `.exe` hex files.
-2.  **Programming the OS Handler:**
-    *   Write a test program with a `.org 0x180` section.
-    *   The handler should perform a recognizable action to prove the interrupt worked. All test programs should gracefully exit via a Memory-Mapped I/O write (`sw $zero, 252($zero)`).
-3.  **Simulation & Verification:**
-    *   Use the `Makefile` to compile the SV source with `iverilog`.
-    *   Run the simulation with `vvp +PROG=your_program.exe`.
-    *   **Waveform Analysis:** Use **Surfer** or **VS Code** to inspect `tb_exceptions.vcd`. Track `pcF`, `intr`, `Exception_Flag`, and `EPC` to verify the pipeline flush at 105ns.
-
----
-
-### Reference Implementation
-All verified source code can be found in the `reference_src/` directory. Use these files to compare your implementation against a working 5-stage pipelined model.
+1.  **Assembler (`tools/assembler.py`):** Translate `.asm` MIPS files into `.exe` hex files.
+2.  **Simulation & Verification:**
+    *   Use the `Makefile` in your architecture's folder.
+    *   Run simulation: `make all ASM=test_prog`.
+    *   Check `tb_computer.vcd` for timing verification.

@@ -59,6 +59,24 @@ stateDiagram-v2
     Jump --> Fetch
 ```
 
+### FSM State Mechanisms
+To reuse hardware (ALU and Memory), the FSM generates control signals that change the function of components each cycle:
+
+1.  **Fetch**: Reads the instruction from memory (`IR = Mem[PC]`) and increments the PC (`PC = PC + 4`). 
+    *   *Signals*: `IorD=0`, `MemRead=1`, `IRWrite=1`, `ALUSrcA=0`, `ALUSrcB=01`, `ALUOp=00`, `PCWrite=1`.
+2.  **Decode**: Computes the branch target address in advance (`ALUOut = PC + (sign-ext(imm) << 2)`) and reads registers into `A` and `B`.
+    *   *Signals*: `ALUSrcA=0`, `ALUSrcB=11`, `ALUOp=00`.
+3.  **ExecuteR**: Performs the R-type operation using operands from registers `A` and `B`.
+    *   *Signals*: `ALUSrcA=1`, `ALUSrcB=00`, `ALUOp=10`.
+4.  **MemAdr**: Computes the effective memory address for `lw` or `sw`.
+    *   *Signals*: `ALUSrcA=1`, `ALUSrcB=10`, `ALUOp=00`.
+5.  **MemRead / MemWrite**: Accesses unified memory using the computed address in `ALUOut`.
+    *   *Signals (Read)*: `IorD=1`, `MemRead=1`.
+    *   *Signals (Write)*: `IorD=1`, `MemWrite=1`.
+6.  **Writeback**: Commits the ALU result or memory data back to the register file.
+    *   *Signals (ALU)*: `RegDst=1`, `RegWrite=1`, `MemToReg=0`.
+    *   *Signals (Mem)*: `RegDst=0`, `RegWrite=1`, `MemToReg=1`.
+
 ---
 
 ## 3. Pipelined Architecture (5 Stages)
