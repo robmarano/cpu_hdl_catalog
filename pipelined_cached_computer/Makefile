@@ -30,5 +30,12 @@ run:
 asm:
 	python3 $(TOOLS_DIR)/assembler.py $(PROG_DIR)/$(ASM).asm $(PROG_DIR)/$(ASM).exe
 
+test_exceptions: clean
+	@echo "Running Exception Testbench..."
+	python3 $(TOOLS_DIR)/assembler.py $(PROG_DIR)/test_exceptions.asm $(PROG_DIR)/test_exceptions.exe
+	iverilog -g2012 -o exceptions.vvp tb_exceptions.sv
+	vvp exceptions.vvp +PROG=$(PROG_DIR)/test_exceptions.exe > debug_output.txt
+	@echo "\nSimulation complete! Check debug_output.txt for cycle-by-cycle logs."
+
 clean:
 	rm -f *.vvp *.vcd debug_output.txt
