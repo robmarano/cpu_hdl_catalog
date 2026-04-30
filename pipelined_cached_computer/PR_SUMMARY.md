@@ -23,7 +23,14 @@ This PR addresses critical architectural bugs identified in the 5-stage MIPS32 p
 - Successfully ran the standard baseline simulation (`test_prog.asm`) verifying `RAW` hazard forwarding and pipelined branch flushes.
 - Successfully ran the asynchronous interrupt simulation (`test_exceptions.asm` via `tb_exceptions.sv`). The testbench correctly triggered an exception, redirected the datapath to the kernel handler, successfully tracked state into `$k0`, and correctly captured `EPC = 0x0000000c`.
 
+## Centralized Tooling & Metric Patches (Catalog Integration)
+- **Assembler Patch (`tools/assembler.py`)**: Modified to support `MULT`, `MFLO`, and `MFHI` R-type encodings. Added silent ignoring for `.end` pseudo-directives and sanitized Unicode em-dashes to allow compilation of legacy textbook programs.
+- **Metric Restoration (`tb_computer.sv`)**: Fixed the `instr_count` telemetry. The counter now cleanly targets `dut.mips_pipelined.dp.instrD` rather than the dynamic `instrF` bus, ensuring the Effective CPI calculation is perfectly accurate and ignores pipeline bubbles.
+- **Exhaustive Verification**: A batch test was executed against all 13 legacy and active programs inside the `programs/` directory. All 13 successfully reached the Memory-Mapped I/O Halt (`sw $zero, 252($zero)`) and output perfect cycle, instruction, and cache hit/miss telemetry.
+
 ## Documentation Updates
 - Updated `GEMINI.md` and `TODO.md` to reflect all architectural tasks as `[RESOLVED]`.
 - Updated `README.md` to mirror the accurate 4-bit ALU control specifications and documented modern VCD wave inspection tools.
-- Generated `ARCHITECTURE.md` to outline the software architecture diagrams and exception sequence logic using Mermaid.js.
+- Generated `ARCHITECTURE.md` to outline the software architecture diagrams, the `Exception Sequence Logic`, and the `Cache Performance Telemetry` interactions using Mermaid.js.
+- Generated `CHALLENGE_TODO.md` outlining the hardware requirements for FPU/SRL execution.
+- Generated `VERIFICATION.md` logging the formal execution metrics of the 13-program batch suite.
