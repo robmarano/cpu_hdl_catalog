@@ -62,7 +62,18 @@ module tb_computer;
         if (!reset) begin
             cycle++;
             
-            if (dut.mips_pipelined.stallF) stallF_str = {C_YEL, ">> STALLED <<", C_RST}; else stallF_str = "      -      ";
+            if (dut.mips_pipelined.dp.instrD != 32'b0 && !dut.mips_pipelined.stallD) begin
+                instr_count++;
+            end
+
+            // Track Hits and Misses in the Cache module
+            if ((dut.dcache.cpu_memread || dut.dcache.cpu_memwrite) && dut.dcache.state == 0) begin
+                if (dut.dcache.hit) cache_hits++;
+                if (dut.dcache.miss) cache_misses++;
+            end
+
+            
+            if (dut.mips_pipelined.stallD) stallF_str = {C_YEL, ">> STALLED <<", C_RST}; else stallF_str = "      -      ";
             if (dut.mips_pipelined.stallD) stallD_str = {C_YEL, ">> STALLED <<", C_RST}; else stallD_str = "      -      ";
             if (dut.mips_pipelined.flushD) flushD_str = {C_RED, ">> FLUSHED <<", C_RST}; else flushD_str = "      -      ";
             if (dut.mips_pipelined.flushE) flushE_str = {C_RED, ">> FLUSHED <<", C_RST}; else flushE_str = "      -      ";

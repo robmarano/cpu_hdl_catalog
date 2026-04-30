@@ -6,3 +6,5 @@ mflo $8
 mfhi $9
 sw   $8,84($0)
 sw   $9,88($0)
+sw $zero, 252($zero)
+

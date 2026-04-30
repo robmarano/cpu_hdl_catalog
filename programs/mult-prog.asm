@@ -10,3 +10,5 @@ Main:                                                      # MIPS machine code
     mflo $v1                # $v1 = HiLo[(2*n-1):n]        ; 00001110
     sw $v0, 84($zero)       # store sum in mem[84] = 0x96  ; ac020054
 End:  .end                  # final sum in LSB of 4th word from top.
+sw $zero, 252($zero)
+

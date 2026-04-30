@@ -8,3 +8,5 @@ Main:                                                      # MIPS machine code
     sub $v0, $v0, $v1       # $v0 = $v0 - $v1              ; 00431022
     sw $v0, 84($zero)       # store sum in mem[84] = -5    ; ac020054
 End:  .end                  # final sum in LSB of 4th word from top.
+sw $zero, 252($zero)
+

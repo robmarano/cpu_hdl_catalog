@@ -23,3 +23,5 @@ around: slt $4, $7, $2      # $4 = 3 < 5 = 1        28          00e2202a
         j end               # should be taken       3c          08000011
         addi $2, $0, 1      # shouldn't happen      40          20020001
 end:    sw $2, 84($0)       # write mem[84] = 7     44          ac020054
+sw $zero, 252($zero)
+
