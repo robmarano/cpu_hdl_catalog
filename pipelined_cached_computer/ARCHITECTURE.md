@@ -113,3 +113,37 @@ To resolve decoding collisions, the 3-bit `alucontrol` was natively expanded to 
 | SLT | `0111` | Combinational | Set if a < b |
 | DIV | `1001` | Sequential | a / b & a % b (updates HiLo) |
 | MULT | `1000` | Sequential | a * b (updates HiLo) |
+
+## Cache Controller Telemetry & Performance Integration
+
+The `pipelined_cached_computer` extends the standard datapath by injecting a highly associative Cache Controller between the CPU and the Main Memory (`dmem.sv`).
+
+The testbench (`tb_computer.sv`) interfaces directly with the Cache Controller state machine to dynamically calculate Hit/Miss ratios and an Effective Cycles Per Instruction (CPI).
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant TB as Testbench (Performance Counters)
+    participant DP as Pipelined Datapath (MEM Stage)
+    participant Cache as Cache Controller
+    participant RAM as Main Memory (10 Cycle Latency)
+
+    DP->>Cache: Request Memory Access (Read/Write)
+    Cache->>Cache: Check Tag & Valid Bits (Cycle 1)
+    
+    alt Cache Hit
+        Cache-->>DP: Return Data Immediately
+        Cache-->>TB: Assert Hit Signal
+        TB->>TB: Increment cache_hits
+    else Cache Miss
+        Cache-->>TB: Assert Miss Signal
+        TB->>TB: Increment cache_misses
+        Cache->>RAM: Stall Pipeline (mem_stall = 1)
+        Note over RAM: Wait 10 Clock Cycles...
+        RAM-->>Cache: Block Load Complete
+        Cache-->>DP: Resume Pipeline (mem_stall = 0)
+    end
+    
+    TB->>TB: Track instr_count (on successful Decode)
+    TB->>TB: Calculate Effective CPI (cycles / instr)
+```
